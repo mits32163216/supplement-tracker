@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+<title>サプリ摂取トラッカー｜西田光弘</title>
+<meta name="theme-color" content="#bd8a2c">
+<meta name="description" content="毎日のサプリ摂取を記録する、端末内完結の記録アプリ。">
+<link rel="manifest" href="manifest.webmanifest">
+<!-- iOS PWA -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="サプリ記録">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f4efe4;--card:#fbf8f1;--ink:#2c2620;--soft:#6f665a;--line:#e3dac9;
+    --asa:#bd8a2c;--hiru:#4f6f52;--gogo:#8a5a3c;--yu:#b5562f;--yoru:#3f4f7a;--neru:#6e3f5f;
+    --green:#4f6f52;--terra:#b5562f;--ochre:#bd8a2c;
+    --safe-top:env(safe-area-inset-top,0px);
+    --safe-bottom:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  [hidden]{display:none !important;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    background:var(--paper);color:var(--ink);
+    font-family:'Zen Kaku Gothic New',sans-serif;font-size:15px;line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    overscroll-behavior-y:none;
+  }
+  button{font-family:inherit;color:inherit;cursor:pointer;}
+  .app{max-width:680px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;}
+
+  /* ===== ヘッダー ===== */
+  header.top{
+    position:sticky;top:0;z-index:20;
+    background:var(--card);border-bottom:1px solid var(--line);
+    padding:calc(var(--safe-top) + 12px) 18px 12px;
+  }
+  header.top::before{content:"";position:absolute;left:0;top:0;right:0;height:4px;
+    background:linear-gradient(90deg,var(--asa) 0 30%,var(--hiru) 30% 46%,var(--gogo) 46% 60%,var(--yu) 60% 74%,var(--yoru) 74% 87%,var(--neru) 87% 100%);}
+  .top-row{display:flex;align-items:center;gap:14px;}
+  .ring{flex:none;}
+  .head-text{flex:1;min-width:0;}
+  .kicker{font-size:9.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--terra);font-weight:700;}
+  .head-text h1{font-family:'Shippori Mincho',serif;font-weight:800;font-size:19px;margin:1px 0 2px;letter-spacing:.02em;}
+  .head-meta{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--soft);}
+  .head-meta b{color:var(--ink);font-weight:700;}
+  .streak-pill{display:inline-flex;align-items:center;gap:4px;background:rgba(189,138,44,.12);color:var(--ochre);
+    font-weight:700;font-size:12px;padding:2px 9px;border-radius:999px;}
+
+  /* ===== コンテンツ ===== */
+  main{flex:1;padding:16px 16px 96px;}
+  .view{display:none;}
+  .view.active{display:block;animation:fade .18s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+
+  /* ===== 今日：ブロック ===== */
+  .legend{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:2px 2px 14px;font-size:11.5px;color:var(--soft);}
+  .legend .lab{font-weight:700;color:var(--ink);}
+  .badge{display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:999px;white-space:nowrap;}
+  .b-empty{color:var(--green);border:1.4px solid var(--green);background:rgba(79,111,82,.07);}
+  .b-meal{color:#fff;background:var(--terra);}
+  .b-after{color:var(--ochre);border:1.4px solid var(--ochre);background:rgba(189,138,44,.10);}
+  .b-drink{color:var(--gogo);border:1.4px solid var(--gogo);background:rgba(138,90,60,.08);}
+
+  .block{margin-bottom:12px;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--card);
+    box-shadow:0 12px 28px -26px rgba(44,38,32,.5);}
+  .block-head{display:flex;align-items:baseline;gap:9px;padding:9px 15px;color:#fff;}
+  .block-head .t{font-family:'Shippori Mincho',serif;font-weight:700;font-size:16px;letter-spacing:.04em;}
+  .block-head .ctx{font-size:11px;opacity:.93;font-weight:500;}
+  .block-head .bcount{margin-left:auto;font-size:11px;font-weight:700;opacity:.95;}
+  .rows{padding:2px 0;}
+  .row{
+    display:grid;grid-template-columns:30px 1fr auto auto;gap:12px;align-items:center;
+    padding:8px 15px;border-top:1px solid #f0ebe0;min-height:52px;
+    background:none;border-left:none;border-right:none;border-bottom:none;width:100%;text-align:left;
+  }
+  .row:first-child{border-top:none;}
+  .row.opt{opacity:.78;}
+  .row:active{background:rgba(189,138,44,.06);}
+  .cb{
+    width:26px;height:26px;border:2px solid var(--ink);border-radius:7px;
+    display:inline-flex;align-items:center;justify-content:center;flex:none;
+    transition:.14s ease;position:relative;
+  }
+  .cb svg{width:16px;height:16px;stroke:var(--card);stroke-width:3.4;fill:none;
+    stroke-linecap:round;stroke-linejoin:round;opacity:0;transform:scale(.4);transition:.16s ease;
+    stroke-dasharray:22;stroke-dashoffset:22;}
+  .row.on .cb{background:var(--ink);border-color:var(--ink);transform:scale(1.04);}
+  .row.on .cb svg{opacity:1;transform:scale(1);stroke-dashoffset:0;}
+  .name{font-weight:500;line-height:1.25;}
+  .name .opt-tag{font-size:10px;color:var(--soft);font-weight:700;margin-left:6px;
+    border:1px solid var(--line);border-radius:4px;padding:0 5px;vertical-align:1px;}
+  .amt{font-weight:800;font-size:15px;color:var(--ink);text-align:right;white-space:nowrap;}
+  .amt small{display:block;font-weight:500;font-size:10px;color:var(--soft);}
+
+  /* メモ */
+  .note-card{margin-top:6px;border:1px solid var(--line);border-radius:9px;background:var(--card);padding:12px 15px;}
+  .note-card label{font-size:11px;font-weight:700;color:var(--soft);letter-spacing:.04em;}
+  .note-card textarea{
+    width:100%;margin-top:6px;border:1px solid var(--line);border-radius:7px;background:var(--paper);
+    color:var(--ink);font-family:inherit;font-size:14px;padding:8px 10px;resize:vertical;min-height:44px;
+  }
+
+  /* ===== 履歴 ===== */
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin:2px 2px 12px;}
+  .cal-head .mlabel{font-family:'Shippori Mincho',serif;font-weight:700;font-size:18px;}
+  .navbtn{width:40px;height:40px;border:1px solid var(--line);background:var(--card);border-radius:9px;
+    font-size:18px;display:inline-flex;align-items:center;justify-content:center;}
+  .navbtn:active{background:rgba(0,0,0,.04);}
+  .cal{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+  .cal-wd{text-align:center;font-size:10.5px;color:var(--soft);font-weight:700;padding-bottom:4px;}
+  .cal-day{aspect-ratio:1;border-radius:8px;border:1px solid transparent;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;font-size:12.5px;font-weight:600;position:relative;background:var(--paper);}
+  .cal-day.empty{background:transparent;}
+  .cal-day.today{box-shadow:0 0 0 2px var(--ink);}
+  .cal-day.sel{border-color:var(--ink);}
+  .cal-day .dot{position:absolute;bottom:4px;width:5px;height:5px;border-radius:50%;background:var(--terra);}
+  .cal-day.future{opacity:.4;}
+  .legend-heat{display:flex;align-items:center;gap:6px;justify-content:flex-end;margin-top:10px;font-size:10.5px;color:var(--soft);}
+  .legend-heat .sw{width:16px;height:12px;border-radius:3px;border:1px solid var(--line);}
+
+  .day-detail{margin-top:16px;}
+  .dd-head{display:flex;align-items:baseline;gap:10px;margin-bottom:8px;}
+  .dd-head .d{font-family:'Shippori Mincho',serif;font-weight:700;font-size:17px;}
+  .dd-head .pct{margin-left:auto;font-weight:800;color:var(--ochre);}
+  .dd-hint{font-size:11px;color:var(--soft);margin:-2px 2px 10px;}
+
+  /* ===== 設定 / 汎用 ===== */
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:14px;}
+  .panel h2{font-family:'Shippori Mincho',serif;font-size:16px;margin:0 0 4px;font-weight:700;}
+  .panel .desc{font-size:12px;color:var(--soft);margin:0 0 12px;}
+  .field{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid #f0ebe0;}
+  .field:first-of-type{border-top:none;}
+  .field .lab{font-weight:500;}
+  .field .lab small{display:block;color:var(--soft);font-size:11px;font-weight:400;}
+  select,input[type=text],input[type=number]{
+    font-family:inherit;font-size:14px;color:var(--ink);background:var(--paper);
+    border:1px solid var(--line);border-radius:7px;padding:8px 10px;
+  }
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    border:1px solid var(--line);background:var(--paper);border-radius:8px;
+    padding:10px 14px;font-weight:700;font-size:14px;}
+  .btn:active{transform:scale(.98);}
+  .btn.primary{background:var(--ink);color:var(--card);border-color:var(--ink);}
+  .btn.terra{background:var(--terra);color:#fff;border-color:var(--terra);}
+  .btn.ghost{background:transparent;}
+  .btn-row{display:flex;flex-wrap:wrap;gap:10px;}
+  .btn.full{width:100%;}
+  .muted{font-size:11px;color:var(--soft);}
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .stat{background:var(--paper);border:1px solid var(--line);border-radius:9px;padding:12px;text-align:center;}
+  .stat .v{font-family:'Shippori Mincho',serif;font-weight:800;font-size:24px;line-height:1;}
+  .stat .k{font-size:11px;color:var(--soft);margin-top:5px;}
+
+  /* 遵守率バー */
+  .adh{padding:9px 0;border-top:1px solid #f0ebe0;}
+  .adh:first-child{border-top:none;}
+  .adh-top{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;}
+  .adh-top .frac{font-weight:700;color:var(--soft);}
+  .adh-bar{height:8px;border-radius:999px;background:var(--paper);overflow:hidden;border:1px solid var(--line);}
+  .adh-fill{height:100%;border-radius:999px;background:var(--green);}
+
+  /* スケジュール編集 */
+  .edit-item{border:1px solid var(--line);border-radius:9px;padding:12px;margin-bottom:10px;background:var(--paper);}
+  .edit-item.disabled{opacity:.5;}
+  .edit-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+  .edit-grid .full{grid-column:1/-1;}
+  .edit-grid label{font-size:10.5px;color:var(--soft);font-weight:700;display:block;margin-bottom:2px;}
+  .edit-grid input,.edit-grid select{width:100%;}
+  .edit-head{display:flex;align-items:center;gap:8px;}
+  .edit-head .ord{display:flex;gap:4px;margin-left:auto;}
+  .minibtn{width:32px;height:32px;border:1px solid var(--line);background:var(--card);border-radius:7px;font-size:14px;
+    display:inline-flex;align-items:center;justify-content:center;}
+  .chk{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;}
+  .chk input{width:20px;height:20px;}
+
+  /* ===== ボトムナビ ===== */
+  nav.tabs{
+    position:fixed;left:0;right:0;bottom:0;z-index:30;
+    background:rgba(251,248,241,.94);backdrop-filter:saturate(1.4) blur(8px);
+    border-top:1px solid var(--line);
+    display:flex;padding:6px 8px calc(var(--safe-bottom) + 6px);
+    max-width:680px;margin:0 auto;
+  }
+  nav.tabs button{
+    flex:1;background:none;border:none;padding:6px 0 4px;border-radius:10px;
+    display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--soft);font-weight:700;font-size:10.5px;
+  }
+  nav.tabs button .ic{width:24px;height:24px;display:block;}
+  nav.tabs button .ic svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+  nav.tabs button.on{color:var(--ink);}
+  nav.tabs button.on .ic svg{stroke:var(--terra);}
+
+  /* トースト */
+  .toast{position:fixed;left:50%;bottom:calc(var(--safe-bottom) + 78px);transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:var(--card);font-size:13px;font-weight:600;padding:10px 16px;border-radius:999px;
+    opacity:0;pointer-events:none;transition:.22s ease;z-index:50;box-shadow:0 10px 24px -10px rgba(0,0,0,.5);}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* リング */
+  .ring svg{transform:rotate(-90deg);}
+  .ring .track{stroke:var(--line);}
+  .ring .prog{stroke:var(--ochre);stroke-linecap:round;transition:stroke-dashoffset .5s ease,stroke .3s;}
+  .ring .pct{font-family:'Shippori Mincho',serif;font-weight:800;}
+
+  .empty-state{text-align:center;color:var(--soft);font-size:13px;padding:40px 20px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="top-row">
+      <div class="ring" id="ring"></div>
+      <div class="head-text">
+        <div class="kicker">Daily Supplement Tracker</div>
+        <h1 id="todayTitle">今日</h1>
+        <div class="head-meta">
+          <span><b id="todayDate">—</b></span>
+          <span class="streak-pill" id="streakPill" hidden>🔥 <span id="streakN">0</span>日連続</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- 今日 -->
+    <section class="view active" id="view-today">
+      <div class="legend">
+        <span class="lab">印：</span>
+        <span class="badge b-empty">空腹OK</span>
+        <span class="badge b-meal">食事と</span>
+        <span class="badge b-after">食後</span>
+        <span class="badge b-drink">コーヒーと</span>
+      </div>
+      <div id="todayBlocks"></div>
+      <div class="note-card">
+        <label for="todayNote">今日のメモ（体調・食事など）</label>
+        <textarea id="todayNote" placeholder="任意。自動保存されます。"></textarea>
+      </div>
+    </section>
+
+    <!-- 履歴 -->
+    <section class="view" id="view-history">
+      <div class="cal-head">
+        <button class="navbtn" id="prevMonth" aria-label="前の月">‹</button>
+        <div class="mlabel" id="calLabel">—</div>
+        <button class="navbtn" id="nextMonth" aria-label="次の月">›</button>
+      </div>
+      <div class="cal">
+        <div class="cal-grid" id="calGrid"></div>
+        <div class="legend-heat">
+          <span>未</span>
+          <span class="sw" style="background:var(--paper)"></span>
+          <span class="sw" style="background:rgba(189,138,44,.35)"></span>
+          <span class="sw" style="background:rgba(189,138,44,.7)"></span>
+          <span class="sw" style="background:var(--ochre)"></span>
+          <span>達成</span>
+        </div>
+      </div>
+      <div class="day-detail" id="dayDetail"></div>
+    </section>
+
+    <!-- 設定 -->
+    <section class="view" id="view-settings">
+      <div class="panel">
+        <h2>継続の記録</h2>
+        <p class="desc">必須項目をすべてチェックできた日を「達成日」とします。</p>
+        <div class="stat-grid">
+          <div class="stat"><div class="v" id="statStreak">0</div><div class="k">現在の連続達成</div></div>
+          <div class="stat"><div class="v" id="statBest">0</div><div class="k">最長連続達成</div></div>
+          <div class="stat"><div class="v" id="statDays">0</div><div class="k">記録した日数</div></div>
+          <div class="stat"><div class="v" id="statAchieved">0</div><div class="k">達成した日数</div></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>項目別の遵守率</h2>
+        <p class="desc">直近<span id="adhWindow">30</span>日。各項目を飲めた日の割合。</p>
+        <div id="adhList"></div>
+      </div>
+
+      <div class="panel">
+        <h2>1日の境界時刻</h2>
+        <p class="desc">この時刻を過ぎると「次の日」になります。就寝が遅い場合は朝5時などに。</p>
+        <div class="field">
+          <span class="lab">境界時刻<small>例：5時にすると 0〜4時台は前日の記録になる</small></span>
+          <select id="boundarySel"></select>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>スケジュール編集</h2>
+        <p class="desc">項目の追加・編集・無効化・並べ替え。変更は今日以降に適用され、過去の記録はそのまま残ります。</p>
+        <div class="btn-row">
+          <button class="btn primary" id="openEditor">スケジュールを編集</button>
+          <button class="btn ghost" id="resetSchedule">初期スケジュールに戻す</button>
+        </div>
+        <p class="muted" style="margin-top:10px">現在のバージョン：<span id="schedVer">—</span></p>
+      </div>
+
+      <div class="panel">
+        <h2>データ</h2>
+        <p class="desc">健康データは端末内に保存され、外部に送信されません。バックアップにエクスポートを使ってください。</p>
+        <div class="btn-row">
+          <button class="btn" id="exportJson">JSONで書き出し</button>
+          <button class="btn" id="exportCsv">CSVで書き出し</button>
+        </div>
+        <div class="btn-row" style="margin-top:10px">
+          <button class="btn ghost" id="importBtn">JSONから復元</button>
+          <input type="file" id="importFile" accept="application/json,.json" hidden>
+        </div>
+        <p class="muted" style="margin-top:12px" id="appInfo">—</p>
+      </div>
+    </section>
+
+    <!-- スケジュール編集（オーバーレイ表示） -->
+    <section class="view" id="view-editor">
+      <div class="cal-head">
+        <button class="navbtn" id="editorBack" aria-label="戻る">‹</button>
+        <div class="mlabel">スケジュール編集</div>
+        <div style="width:40px"></div>
+      </div>
+      <p class="dd-hint">タイミング印は「空腹OK / 食事と / 食後 / コーヒーと・コーヒー前」などを自由に入力できます。</p>
+      <div id="editorList"></div>
+      <button class="btn full" id="addItem" style="margin-bottom:12px">＋ 項目を追加</button>
+      <div class="btn-row">
+        <button class="btn primary full" id="saveSchedule">保存して反映（今日以降）</button>
+      </div>
+      <p class="muted" style="margin-top:10px">保存すると新しいバージョンになり、今日からこの内容で記録します。過去の記録は当時の内容のまま残ります。</p>
+    </section>
+  </main>
+
+  <nav class="tabs">
+    <button data-tab="today" class="on">
+      <span class="ic"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
+      今日
+    </button>
+    <button data-tab="history">
+      <span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></span>
+      履歴
+    </button>
+    <button data-tab="settings">
+      <span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 4.6 14H4.5a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 6 7.3l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 11 4.6V4.5a2 2 0 1 1 4 0v.1A1.6 1.6 0 0 0 17 6l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.6 1.6 0 0 0 19.4 9"/></svg></span>
+      設定
+    </button>
+  </nav>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
