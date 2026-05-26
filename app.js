@@ -7,7 +7,7 @@
  * シードデータ（§3.2）
  * ============================================================ */
 const SEED = {
-  scheduleVersion: '2026-05-25',
+  scheduleVersion: '2026-05-26',
   blocks: [
     { id: 'morning',   label: '朝',     context: '断食。コーヒー＋MCTと',     color: '#bd8a2c' },
     { id: 'lunch',     label: '昼',     context: 'ランチ＝メイン食',          color: '#4f6f52' },
@@ -21,6 +21,7 @@ const SEED = {
     { id: 'morning_mct',          block: 'morning',   name: 'MCTオイル',                     dose: '小さじ1', badge: 'コーヒーに', optional: false },
     { id: 'morning_omega3',       block: 'morning',   name: 'オメガ3（魚油）',                dose: '2粒',   doseNote: 'EPA+DHA 1,500mg',   badge: 'コーヒーと', optional: false },
     { id: 'morning_multivitamin', block: 'morning',   name: 'マルチビタミン（B群代替）',       dose: '6粒',   doseNote: '朝のみ・VC850/D2400含む', badge: 'コーヒーと', optional: false, morningOnly: true },
+    { id: 'morning_b12',          block: 'morning',   name: 'メチルコバラミンB12（活性型）',    dose: '1粒',   doseNote: '500mcg・朝/食前が良い', badge: 'コーヒーと', optional: false },
     { id: 'lunch_enzyme',         block: 'lunch',     name: '消化酵素',                      dose: '1回分', badge: '食べ始め', optional: false },
     { id: 'lunch_solaray',        block: 'lunch',     name: 'Solaray Calcium Citrate Plus', dose: '2粒',   badge: '食事と', optional: false },
     { id: 'lunch_d3',             block: 'lunch',     name: 'ビタミンD3',                    dose: '1粒',   doseNote: '1,000–2,000 IU', badge: '食事と', optional: false },
@@ -673,6 +674,18 @@ async function init() {
     state.scheduleVersions = versions.value;
     const cv = await idbGet('meta', 'currentVersion');
     state.currentVersion = cv ? cv.value : state.scheduleVersions[state.scheduleVersions.length - 1].version;
+  }
+
+  // 起動時マイグレーション：ソース側のシードに新しい版（SEED.scheduleVersion）が来ていて、
+  // まだ取り込んでいなければ新バージョンとして適用する（＝アプリ更新でスケジュールが変わったとき）。
+  // 過去ログは当時の版のまま不変（scheduleByVersion）。手動編集（ISO版）は上書きしない。
+  const seedKnown = state.scheduleVersions.some(v => v.version === SEED.scheduleVersion);
+  if (!seedKnown) {
+    const seedSnap = { version: SEED.scheduleVersion, blocks: JSON.parse(JSON.stringify(SEED.blocks)), items: SEED.items.map(i => ({ ...i, enabled: true })) };
+    state.scheduleVersions.push(seedSnap);
+    state.currentVersion = SEED.scheduleVersion;
+    await idbPut('meta', { key: 'scheduleVersions', value: state.scheduleVersions });
+    await idbPut('meta', { key: 'currentVersion', value: state.currentVersion });
   }
 
   // イベント
