@@ -7,7 +7,7 @@
  * シードデータ（§3.2）
  * ============================================================ */
 const SEED = {
-  scheduleVersion: '2026-05-26',
+  scheduleVersion: '2026-06-08',
   blocks: [
     { id: 'morning',   label: '朝',     context: '断食。コーヒー＋MCTと',     color: '#bd8a2c' },
     { id: 'lunch',     label: '昼',     context: 'ランチ＝メイン食',          color: '#4f6f52' },
@@ -17,21 +17,28 @@ const SEED = {
     { id: 'bedtime',   label: '寝る前', context: '',                         color: '#6e3f5f' }
   ],
   items: [
-    { id: 'morning_citrate',      block: 'morning',   name: 'クエン酸',                      dose: '3粒',   doseNote: '水と一緒に',         badge: 'コーヒー前', optional: false },
-    { id: 'morning_mct',          block: 'morning',   name: 'MCTオイル',                     dose: '小さじ1', badge: 'コーヒーに', optional: false },
-    { id: 'morning_omega3',       block: 'morning',   name: 'オメガ3（魚油）',                dose: '2粒',   doseNote: 'EPA+DHA 1,500mg',   badge: 'コーヒーと', optional: false },
-    { id: 'morning_multivitamin', block: 'morning',   name: 'マルチビタミン（B群代替）',       dose: '6粒',   doseNote: '朝のみ・VC850/D2400含む', badge: 'コーヒーと', optional: false, morningOnly: true },
-    { id: 'morning_b12',          block: 'morning',   name: 'メチルコバラミンB12（活性型）',    dose: '1粒',   doseNote: '500mcg・朝/食前が良い', badge: 'コーヒーと', optional: false },
-    { id: 'lunch_enzyme',         block: 'lunch',     name: '消化酵素',                      dose: '1回分', badge: '食べ始め', optional: false },
-    { id: 'lunch_solaray',        block: 'lunch',     name: 'Solaray Calcium Citrate Plus', dose: '2粒',   badge: '食事と', optional: false },
-    { id: 'lunch_d3',             block: 'lunch',     name: 'ビタミンD3',                    dose: '1粒',   doseNote: '1,000–2,000 IU', badge: '食事と', optional: false },
-    { id: 'lunch_omega3',         block: 'lunch',     name: 'オメガ3（魚油）',                dose: '1粒',   doseNote: 'EPA+DHA 750mg', badge: '食事と', optional: false },
-    { id: 'lunch_juice',          block: 'lunch',     name: '人参ジュース',                   dose: '1杯',   badge: '食後', optional: true },
-    { id: 'afternoon_citrate',    block: 'afternoon', name: 'クエン酸',                      dose: '2粒',   doseNote: '水と一緒に', badge: 'コーヒー前', optional: false },
-    { id: 'evening_solaray',      block: 'evening',   name: 'Solaray Calcium Citrate Plus', dose: '1粒',   badge: '食事と', optional: false },
-    { id: 'evening_enzyme',       block: 'evening',   name: '消化酵素',                      dose: '1回分', doseNote: '固形のとき', badge: '食事と', optional: true },
-    { id: 'night_enzyme',         block: 'night',     name: '消化酵素',                      dose: '1回分', doseNote: '食べる日だけ', badge: '食事と', optional: true },
-    { id: 'bedtime_magnesium',    block: 'bedtime',   name: 'マグネシウム（グリシン酸）',      dose: '1粒',   doseNote: '150–200mg', badge: '空腹OK', optional: false }
+    // 朝
+    { id: 'morning_citrate',      block: 'morning',   name: 'クエン酸',                          dose: '3粒',     doseNote: '470mg/粒・水と一緒に',                  badge: 'コーヒー前', optional: false },
+    { id: 'morning_mct',          block: 'morning',   name: 'MCTオイル',                         dose: '小さじ1', doseNote: 'C8/C10・ケトン供給',                    badge: 'コーヒーに', optional: false },
+    { id: 'morning_b_complex',    block: 'morning',   name: 'Basic B Complex（活性型）',          dose: '2粒',     doseNote: 'メチル葉酸・メチルB12・B2計20mg',        badge: 'コーヒーと', optional: false },
+    { id: 'morning_b12',          block: 'morning',   name: 'メチルコバラミンB12',                dose: '1粒',     doseNote: '500mcg',                                badge: 'コーヒーと', optional: false },
+    { id: 'morning_chlorella',    block: 'morning',   name: 'クロレラ',                          dose: '5粒',     doseNote: '抗酸化・緑栄養（B12は数えない）',          badge: 'コーヒーと', optional: true  },
+    // 昼
+    { id: 'lunch_enzyme',         block: 'lunch',     name: '消化酵素（Thorne）',                 dose: '2カプセル', doseNote: 'ベタインHCl・牛胆汁含む',              badge: '食べ始め', optional: false },
+    { id: 'lunch_solaray',        block: 'lunch',     name: 'Solaray Calcium Citrate Plus',     dose: '2粒',     doseNote: 'Ca/Mg/Zn/銅/D/B6複合',                  badge: '食事と',   optional: false },
+    { id: 'lunch_d3',             block: 'lunch',     name: 'ビタミンD3',                        dose: '1粒',     doseNote: '10,000IU・週4回想定',                   badge: '食事と',   optional: true  },
+    { id: 'lunch_omega3',         block: 'lunch',     name: 'オメガ3（魚油）',                    dose: '3粒',     doseNote: 'EPA+DHA 約2,250mg',                    badge: '食事と',   optional: false },
+    { id: 'lunch_stage7',         block: 'lunch',     name: 'STAGE7（アムラ・ウコン等）',         dose: '2粒',     doseNote: '抗酸化・ウコンは脂と吸収UP',             badge: '食事と',   optional: true  },
+    { id: 'lunch_juice',          block: 'lunch',     name: '人参ジュース',                       dose: '1杯',     badge: '食後',                                                                              optional: true  },
+    // 午後
+    { id: 'afternoon_citrate',    block: 'afternoon', name: 'クエン酸',                          dose: '2粒',     doseNote: '470mg/粒・水と一緒に',                  badge: 'コーヒー前', optional: false },
+    // 夕方
+    { id: 'evening_solaray',      block: 'evening',   name: 'Solaray Calcium Citrate Plus',     dose: '1粒',     doseNote: '複合',                                  badge: '食事と',   optional: false },
+    { id: 'evening_enzyme',       block: 'evening',   name: '消化酵素（Thorne）',                 dose: '2カプセル', doseNote: '固形のとき',                          badge: '食事と',   optional: true  },
+    // 夜
+    { id: 'night_enzyme',         block: 'night',     name: '消化酵素（Thorne）',                 dose: '2カプセル', doseNote: '食べる日だけ',                        badge: '食事と',   optional: true  },
+    // 寝る前
+    { id: 'bedtime_magnesium',    block: 'bedtime',   name: 'マグネシウム（Thorne CitraMate）',   dose: '1粒',     doseNote: '元素Mg 135mg・クエン酸+リンゴ酸',        badge: '空腹OK',   optional: false }
   ]
 };
 
@@ -74,14 +81,36 @@ function idbAll(store) {
  * 状態
  * ============================================================ */
 const state = {
-  settings: { dayBoundaryHour: 0, adhWindow: 30 },
+  settings: { dayBoundaryHour: 0, adhWindow: 30, mode: 'home' }, // mode: 'home' | 'travel'
   scheduleVersions: [],   // [{version, blocks, items}]  末尾が最新
   currentVersion: null,   // 最新バージョン文字列
+  travelPack: null,       // string[] of itemIds in pack（旅行モードで表示する項目）。null=未初期化
   todayKey: null,
   calMonth: null,         // 履歴カレンダーの表示月（Date：1日）
   selectedDate: null,     // 履歴で選択中の日
-  editDraft: null         // 編集中のスケジュール（items 配列）
+  editDraft: null,        // 編集中のスケジュール（items 配列）
+  packDraft: null         // 編集中の持参リスト（itemId のSet風オブジェクト）
 };
+
+/* ===== モード/持参リスト ヘルパ ===== */
+function currentMode() { return state.settings.mode || 'home'; }
+/** その日の "見える項目" を mode/pack で絞る共通フィルタ */
+function filterByModeAndPack(items, mode, packList) {
+  const arr = items.filter(i => i.enabled !== false);
+  if (mode !== 'travel') return arr;
+  const pack = new Set(packList || []);
+  return arr.filter(i => pack.has(i.id));
+}
+/** 今日の visible items（現在のmode/pack基準） */
+function visibleItemsToday(sched) {
+  return filterByModeAndPack(sched.items, currentMode(), state.travelPack);
+}
+/** 過去日の visible items（その日のlogのmode/pack基準） */
+function visibleItemsForLog(log, sched) {
+  const mode = log.mode || 'home';
+  const pack = mode === 'travel' ? (log.packList || state.travelPack || []) : null;
+  return filterByModeAndPack(sched.items, mode, pack);
+}
 
 function currentSchedule() {
   return state.scheduleVersions.find(v => v.version === state.currentVersion) || state.scheduleVersions[state.scheduleVersions.length - 1] || SEED;
@@ -116,11 +145,26 @@ async function getLog(date) {
 /** その日のログを取得（なければ現行バージョンで初期化して返す。保存はしない） */
 async function ensureLog(date) {
   let log = await getLog(date);
-  if (!log) log = { date, entries: {}, note: '', scheduleVersion: state.currentVersion };
+  if (!log) {
+    log = { date, entries: {}, note: '', scheduleVersion: state.currentVersion };
+    // 今日のログは生成時に現在のmode/packListをスタンプ
+    if (date === todayKey()) {
+      log.mode = currentMode();
+      if (log.mode === 'travel') log.packList = [...(state.travelPack || [])];
+    } else {
+      log.mode = 'home'; // 過去日にログが無ければ home 扱い（完了率0%なので影響なし）
+    }
+  }
   if (!log.scheduleVersion) log.scheduleVersion = state.currentVersion;
   return log;
 }
 async function saveLog(log) {
+  // 今日のログを保存するときは最新のmode/packListに更新（モード切替に即追従）
+  if (log.date === todayKey()) {
+    log.mode = currentMode();
+    if (log.mode === 'travel') log.packList = [...(state.travelPack || [])];
+    else delete log.packList;
+  }
   // 空ログ（チェック0・メモ無し）は保存しない＝記録が無い日はそのまま「未」
   const hasCheck = Object.values(log.entries || {}).some(e => e && e.checked);
   if (!hasCheck && !(log.note && log.note.trim())) {
@@ -134,8 +178,18 @@ async function saveLog(log) {
  * 集計
  * ============================================================ */
 function requiredItemsFor(sched) { return sched.items.filter(i => i.enabled !== false && !i.optional); }
+/** その日のmode/packListで「必須として期待されている項目」を絞り込んで返す */
+function requiredItemsForDay(log, sched) {
+  let required = requiredItemsFor(sched);
+  const mode = log.mode || 'home';
+  if (mode === 'travel') {
+    const pack = new Set(log.packList || []);
+    required = required.filter(i => pack.has(i.id));
+  }
+  return required;
+}
 function dayCompletion(log, sched) {
-  const required = requiredItemsFor(sched);
+  const required = requiredItemsForDay(log, sched);
   if (required.length === 0) return 1;
   let done = 0;
   for (const it of required) if (log.entries[it.id] && log.entries[it.id].checked) done++;
@@ -198,8 +252,13 @@ async function computeAdherence() {
       const daySched = scheduleByVersion(log ? log.scheduleVersion : state.currentVersion);
       const existsThatDay = daySched.items.some(x => x.id === it.id && x.enabled !== false);
       if (existsThatDay) {
-        denom++;
-        if (log && log.entries[it.id] && log.entries[it.id].checked) num++;
+        // 旅行モードの日は持参リストに無い項目を「期待されていない」とみなして分母から除外
+        const dayMode = log && log.mode ? log.mode : 'home';
+        const inPack = dayMode === 'travel' && log.packList ? log.packList.includes(it.id) : true;
+        if (dayMode !== 'travel' || inPack) {
+          denom++;
+          if (log && log.entries[it.id] && log.entries[it.id].checked) num++;
+        }
       }
       cur.setDate(cur.getDate() + 1);
     }
@@ -256,10 +315,13 @@ async function renderToday() {
   const sched = currentSchedule();
 
   $('#todayDate').textContent = fmtJPFull(state.todayKey);
+  // モード表示・トグル状態を反映
+  updateModeUI();
 
+  const visible = visibleItemsToday(sched);
   const wrap = $('#todayBlocks'); wrap.innerHTML = '';
   for (const b of sched.blocks) {
-    const items = sched.items.filter(i => i.block === b.id && i.enabled !== false);
+    const items = visible.filter(i => i.block === b.id);
     if (items.length === 0) continue;
     const doneReq = items.filter(i => !i.optional && todayLog.entries[i.id] && todayLog.entries[i.id].checked).length;
     const totReq = items.filter(i => !i.optional).length;
@@ -322,10 +384,11 @@ async function toggleToday(itemId) {
 
 function refreshBlockCounts() {
   const sched = currentSchedule();
+  const visible = visibleItemsToday(sched);
   $$('#todayBlocks .block').forEach((blockEl, idx) => {
-    const heads = sched.blocks.filter(b => sched.items.some(i => i.block === b.id && i.enabled !== false));
+    const heads = sched.blocks.filter(b => visible.some(i => i.block === b.id));
     const b = heads[idx]; if (!b) return;
-    const items = sched.items.filter(i => i.block === b.id && i.enabled !== false && !i.optional);
+    const items = visible.filter(i => i.block === b.id && !i.optional);
     const done = items.filter(i => todayLog.entries[i.id] && todayLog.entries[i.id].checked).length;
     const c = blockEl.querySelector('.bcount'); if (c) c.textContent = `${done}/${items.length}`;
   });
@@ -404,12 +467,15 @@ async function renderDayDetail(key) {
   const tKey = todayKey();
   const editable = key <= tKey; // 未来日は編集不可
 
-  let html = `<div class="dd-head"><span class="d">${esc(fmtJP(key))}</span>
+  const dayMode = log.mode || 'home';
+  const modeBadge = dayMode === 'travel' ? '<span class="day-mode-pill">🧳 旅行モード</span>' : '';
+  let html = `<div class="dd-head"><span class="d">${esc(fmtJP(key))}</span>${modeBadge}
      <span class="pct">${Math.round(pct * 100)}%</span></div>`;
   html += `<p class="dd-hint">${editable ? 'タップで後から修正できます（飲み忘れ・付け忘れの訂正用）。' : '未来の日付は記録できません。'}</p>`;
 
+  const visibleForDay = visibleItemsForLog(log, sched);
   for (const b of sched.blocks) {
-    const items = sched.items.filter(i => i.block === b.id && i.enabled !== false);
+    const items = visibleForDay.filter(i => i.block === b.id);
     if (items.length === 0) continue;
     let rows = '';
     for (const it of items) {
@@ -491,6 +557,133 @@ async function renderSettings() {
       </div>`;
     }).join('');
   }
+}
+
+/* ============================================================
+ * モード切替（在宅 ⇄ 旅行）と 持参リスト編集
+ * ============================================================ */
+
+/** 現在のmodeをUIに反映（モードバー・🧳バッジ・持参リスト編集ボタンの表示） */
+function updateModeUI() {
+  const mode = currentMode();
+  $$('#modeBar .mode-btn').forEach(b => b.classList.toggle('on', b.dataset.mode === mode));
+  const ind = $('#travelIndicator'); if (ind) ind.hidden = (mode !== 'travel');
+  const pbtn = $('#packEditBtnInline'); if (pbtn) pbtn.hidden = (mode !== 'travel');
+}
+
+/** モード切替（在宅 ⇄ 旅行） */
+async function setMode(newMode) {
+  if (newMode === currentMode()) return;
+  // 旅行モードへ切替時、持参リストが空なら必ず編集画面へ
+  if (newMode === 'travel' && (!state.travelPack || state.travelPack.length === 0)) {
+    state.settings.mode = newMode;
+    await idbPut('meta', { key: 'settings', value: state.settings });
+    openPackEditor(true);
+    return;
+  }
+  state.settings.mode = newMode;
+  await idbPut('meta', { key: 'settings', value: state.settings });
+  // 今日のログ（あれば）にmode/packListを反映
+  if (todayLog) {
+    todayLog.mode = newMode;
+    if (newMode === 'travel') todayLog.packList = [...(state.travelPack || [])];
+    else delete todayLog.packList;
+    await saveLog(todayLog);
+  }
+  toast(newMode === 'travel' ? '🧳 旅行モードに切替えました' : '🏠 在宅モードに切替えました');
+  await renderToday();
+}
+
+/** 持参リスト編集画面を開く */
+function openPackEditor(fromModeToggle) {
+  // 現在のpackをドラフトにコピー（無ければ全項目チェック済みでスタート）
+  const all = currentSchedule().items.filter(i => i.enabled !== false).map(i => i.id);
+  const baseSet = new Set(state.travelPack && state.travelPack.length ? state.travelPack : all);
+  state.packDraft = baseSet;
+  state.packEditorOpenedFromToggle = !!fromModeToggle;
+  showView('pack');
+  renderPackEditor();
+}
+
+function renderPackEditor() {
+  const sched = currentSchedule();
+  const list = $('#packList'); list.innerHTML = '';
+  for (const b of sched.blocks) {
+    const items = sched.items.filter(i => i.block === b.id && i.enabled !== false);
+    if (items.length === 0) continue;
+    const sec = document.createElement('div');
+    sec.className = 'pack-section';
+    let rows = '';
+    for (const it of items) {
+      const checked = state.packDraft.has(it.id);
+      rows += `<label class="pack-row${checked ? ' on' : ''}" data-id="${esc(it.id)}">
+        <input type="checkbox" ${checked ? 'checked' : ''}>
+        <span class="pack-name">${esc(it.name)}${it.optional ? '<span class="opt-tag">任意</span>' : ''}</span>
+        <span class="pack-dose">${esc(it.dose)}</span>
+      </label>`;
+    }
+    sec.innerHTML = `<div class="pack-block-head" style="background:${esc(b.color)}">${esc(b.label)}</div><div class="pack-rows">${rows}</div>`;
+    list.appendChild(sec);
+  }
+  // 全選択／全解除のクイックボタン
+  const ctrl = $('#packQuickCtrl');
+  if (ctrl) ctrl.innerHTML = `<button class="btn ghost" id="packAll">全部✓</button><button class="btn ghost" id="packNone">全部外す</button>`;
+  $$('#packList .pack-row input').forEach(inp => {
+    inp.addEventListener('change', () => {
+      const row = inp.closest('.pack-row');
+      const id = row.dataset.id;
+      if (inp.checked) state.packDraft.add(id); else state.packDraft.delete(id);
+      row.classList.toggle('on', inp.checked);
+      updatePackCount();
+    });
+  });
+  const allBtn = $('#packAll'); if (allBtn) allBtn.addEventListener('click', () => {
+    for (const it of sched.items) if (it.enabled !== false) state.packDraft.add(it.id);
+    renderPackEditor();
+  });
+  const noneBtn = $('#packNone'); if (noneBtn) noneBtn.addEventListener('click', () => {
+    state.packDraft.clear();
+    renderPackEditor();
+  });
+  updatePackCount();
+}
+
+function updatePackCount() {
+  const c = $('#packCount'); if (!c) return;
+  const total = currentSchedule().items.filter(i => i.enabled !== false).length;
+  c.textContent = `${state.packDraft.size}/${total} 項目を持参`;
+}
+
+async function savePackList() {
+  state.travelPack = [...state.packDraft];
+  await idbPut('meta', { key: 'travelPack', value: state.travelPack });
+  // 持参リスト編集→保存で旅行モードへ確定（toggle 経由オープン時）or 単独編集時はモード維持
+  if (state.packEditorOpenedFromToggle) {
+    // 既にモードはtravelに変更済み。今日のログにpackListを反映
+    if (todayLog) {
+      todayLog.mode = 'travel';
+      todayLog.packList = [...state.travelPack];
+      await saveLog(todayLog);
+    }
+    toast('🧳 旅行モード（持参リスト保存）');
+  } else {
+    // 旅行モード中なら今日のログも更新
+    if (currentMode() === 'travel' && todayLog) {
+      todayLog.packList = [...state.travelPack];
+      await saveLog(todayLog);
+    }
+    toast('持参リストを保存しました');
+  }
+  showView('today');
+}
+
+function cancelPackList() {
+  // 編集モードからの起動で持参リスト未確定→在宅モードへ戻す
+  if (state.packEditorOpenedFromToggle && (!state.travelPack || state.travelPack.length === 0)) {
+    state.settings.mode = 'home';
+    idbPut('meta', { key: 'settings', value: state.settings });
+  }
+  showView('today');
 }
 
 /* ============================================================
@@ -643,10 +836,12 @@ async function importJson(file) {
  * ============================================================ */
 function showView(name) {
   $$('.view').forEach(v => v.classList.remove('active'));
-  const map = { today: 'view-today', history: 'view-history', settings: 'view-settings', editor: 'view-editor' };
+  const map = { today: 'view-today', history: 'view-history', settings: 'view-settings', editor: 'view-editor', pack: 'view-pack' };
   $('#' + map[name]).classList.add('active');
-  $$('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === name));
-  $('#todayTitle').textContent = { today: '今日', history: '履歴', settings: '設定', editor: '設定' }[name];
+  // ボトムナビは「pack」「editor」は今日タブをアクティブ風に維持
+  const navTab = (name === 'pack' || name === 'editor') ? 'today' : name;
+  $$('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === navTab));
+  $('#todayTitle').textContent = { today: '今日', history: '履歴', settings: '設定', editor: '設定', pack: '持参リスト' }[name];
 
   if (name === 'today') renderToday();
   else if (name === 'history') renderHistory();
@@ -688,6 +883,16 @@ async function init() {
     await idbPut('meta', { key: 'currentVersion', value: state.currentVersion });
   }
 
+  // 持参リスト（travelPack）ロード or 初期化
+  const tp = await idbGet('meta', 'travelPack');
+  if (tp && Array.isArray(tp.value)) {
+    state.travelPack = tp.value;
+  } else {
+    // 未初期化：マスター全項目を「両方」前提でデフォルト持参リスト化
+    state.travelPack = currentSchedule().items.filter(i => i.enabled !== false).map(i => i.id);
+    await idbPut('meta', { key: 'travelPack', value: state.travelPack });
+  }
+
   // イベント
   $$('nav.tabs button').forEach(b => b.addEventListener('click', () => showView(b.dataset.tab)));
   $('#prevMonth').addEventListener('click', () => { state.calMonth.setMonth(state.calMonth.getMonth() - 1); renderHistory(); });
@@ -702,6 +907,15 @@ async function init() {
   $('#importBtn').addEventListener('click', () => $('#importFile').click());
   $('#importFile').addEventListener('change', (e) => { if (e.target.files[0]) importJson(e.target.files[0]); e.target.value = ''; });
   bindTodayNote();
+
+  // モード切替（在宅 ⇄ 旅行）
+  $$('#modeBar .mode-btn').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+  // 持参リスト編集ボタン（モードバー横・設定タブ両方）
+  const pBtnInline = $('#packEditBtnInline'); if (pBtnInline) pBtnInline.addEventListener('click', () => openPackEditor(false));
+  const pBtnSettings = $('#openPackEditor'); if (pBtnSettings) pBtnSettings.addEventListener('click', () => openPackEditor(false));
+  // 持参リスト編集の保存・戻る
+  const savePackBtn = $('#savePackBtn'); if (savePackBtn) savePackBtn.addEventListener('click', savePackList);
+  const packBackBtn = $('#packBack'); if (packBackBtn) packBackBtn.addEventListener('click', cancelPackList);
 
   // 復帰時に日付が変わっていたら今日を更新
   document.addEventListener('visibilitychange', () => {

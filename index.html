@@ -54,6 +54,23 @@
   .head-meta b{color:var(--ink);font-weight:700;}
   .streak-pill{display:inline-flex;align-items:center;gap:4px;background:rgba(189,138,44,.12);color:var(--ochre);
     font-weight:700;font-size:12px;padding:2px 9px;border-radius:999px;}
+  .travel-pill{display:inline-flex;align-items:center;gap:4px;background:rgba(63,79,122,.14);color:var(--yoru);
+    font-weight:700;font-size:12px;padding:2px 9px;border-radius:999px;}
+  .day-mode-pill{display:inline-flex;align-items:center;gap:4px;background:rgba(63,79,122,.14);color:var(--yoru);
+    font-weight:700;font-size:11px;padding:2px 8px;border-radius:999px;margin-left:6px;vertical-align:2px;}
+
+  /* ===== モードバー（在宅 ⇄ 旅行） ===== */
+  .mode-bar{display:flex;align-items:center;gap:8px;margin:2px 2px 12px;}
+  .mode-btn{
+    flex:1;border:1px solid var(--line);background:var(--card);
+    padding:9px 8px;border-radius:9px;font-weight:700;font-size:13px;color:var(--soft);
+    display:inline-flex;align-items:center;justify-content:center;gap:4px;
+    transition:.16s ease;
+  }
+  .mode-btn:active{transform:scale(.98);}
+  .mode-btn.on{background:var(--ink);color:var(--card);border-color:var(--ink);}
+  .mode-btn[data-mode="travel"].on{background:var(--yoru);border-color:var(--yoru);}
+  .mode-bar-edit{flex:none;font-size:12px;padding:7px 10px;}
 
   /* ===== コンテンツ ===== */
   main{flex:1;padding:16px 16px 96px;}
@@ -169,6 +186,17 @@
   .adh-bar{height:8px;border-radius:999px;background:var(--paper);overflow:hidden;border:1px solid var(--line);}
   .adh-fill{height:100%;border-radius:999px;background:var(--green);}
 
+  /* 持参リスト編集 */
+  .pack-section{margin-bottom:12px;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--card);}
+  .pack-block-head{padding:7px 14px;color:#fff;font-family:'Shippori Mincho',serif;font-weight:700;font-size:14px;letter-spacing:.04em;}
+  .pack-rows{padding:2px 0;}
+  .pack-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-top:1px solid #f0ebe0;cursor:pointer;min-height:48px;}
+  .pack-row:first-child{border-top:none;}
+  .pack-row input[type=checkbox]{width:22px;height:22px;flex:none;accent-color:var(--yoru);}
+  .pack-row .pack-name{flex:1;font-weight:500;}
+  .pack-row .pack-dose{font-weight:700;font-size:13px;color:var(--soft);white-space:nowrap;}
+  .pack-row.on{background:rgba(63,79,122,.05);}
+
   /* スケジュール編集 */
   .edit-item{border:1px solid var(--line);border-radius:9px;padding:12px;margin-bottom:10px;background:var(--paper);}
   .edit-item.disabled{opacity:.5;}
@@ -226,6 +254,7 @@
         <div class="head-meta">
           <span><b id="todayDate">—</b></span>
           <span class="streak-pill" id="streakPill" hidden>🔥 <span id="streakN">0</span>日連続</span>
+          <span class="travel-pill" id="travelIndicator" hidden>🧳 旅行中</span>
         </div>
       </div>
     </div>
@@ -234,6 +263,11 @@
   <main>
     <!-- 今日 -->
     <section class="view active" id="view-today">
+      <div id="modeBar" class="mode-bar">
+        <button class="mode-btn on" data-mode="home" aria-label="在宅モード">🏠 在宅</button>
+        <button class="mode-btn" data-mode="travel" aria-label="旅行モード">🧳 旅行</button>
+        <button class="btn ghost mode-bar-edit" id="packEditBtnInline" hidden>持参リスト編集</button>
+      </div>
       <div class="legend">
         <span class="lab">印：</span>
         <span class="badge b-empty">空腹OK</span>
@@ -298,6 +332,14 @@
       </div>
 
       <div class="panel">
+        <h2>旅行モード</h2>
+        <p class="desc">旅行中は「持参リスト」に入れた項目だけが今日の画面に出ます。達成率の分母も持参分だけになるので、持って行かなかった項目で連続記録が崩れません。</p>
+        <div class="btn-row">
+          <button class="btn primary" id="openPackEditor">持参リストを編集</button>
+        </div>
+      </div>
+
+      <div class="panel">
         <h2>スケジュール編集</h2>
         <p class="desc">項目の追加・編集・無効化・並べ替え。変更は今日以降に適用され、過去の記録はそのまま残ります。</p>
         <div class="btn-row">
@@ -336,6 +378,23 @@
         <button class="btn primary full" id="saveSchedule">保存して反映（今日以降）</button>
       </div>
       <p class="muted" style="margin-top:10px">保存すると新しいバージョンになり、今日からこの内容で記録します。過去の記録は当時の内容のまま残ります。</p>
+    </section>
+
+    <!-- 持参リスト編集（旅行モード用・オーバーレイ表示） -->
+    <section class="view" id="view-pack">
+      <div class="cal-head">
+        <button class="navbtn" id="packBack" aria-label="戻る">‹</button>
+        <div class="mlabel">持参リスト</div>
+        <div style="width:40px"></div>
+      </div>
+      <p class="dd-hint">旅行に持って行く項目に✓を付けてください。チェックを外したものは旅行モード中の「今日」画面に出ず、達成率の分母からも外れます。</p>
+      <div class="btn-row" id="packQuickCtrl" style="margin-bottom:8px"></div>
+      <div id="packList"></div>
+      <p class="muted" style="margin:8px 2px"><span id="packCount">—</span></p>
+      <div class="btn-row">
+        <button class="btn primary full" id="savePackBtn">保存</button>
+      </div>
+      <p class="muted" style="margin-top:10px">保存しても既存の記録・カレンダー・連続記録はそのまま残ります。持参リストは何度でも編集できます。</p>
     </section>
   </main>
 
