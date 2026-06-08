@@ -7,7 +7,7 @@
  * シードデータ（§3.2）
  * ============================================================ */
 const SEED = {
-  scheduleVersion: '2026-06-08',
+  scheduleVersion: '2026-06-08b',
   blocks: [
     { id: 'morning',   label: '朝',     context: '断食。コーヒー＋MCTと',     color: '#bd8a2c' },
     { id: 'lunch',     label: '昼',     context: 'ランチ＝メイン食',          color: '#4f6f52' },
@@ -22,6 +22,7 @@ const SEED = {
     { id: 'morning_mct',          block: 'morning',   name: 'MCTオイル',                         dose: '小さじ1', doseNote: 'C8/C10・ケトン供給',                    badge: 'コーヒーに', optional: false },
     { id: 'morning_b_complex',    block: 'morning',   name: 'Basic B Complex（活性型）',          dose: '2粒',     doseNote: 'メチル葉酸・メチルB12・B2計20mg',        badge: 'コーヒーと', optional: false },
     { id: 'morning_b12',          block: 'morning',   name: 'メチルコバラミンB12',                dose: '1粒',     doseNote: '500mcg',                                badge: 'コーヒーと', optional: false },
+    { id: 'morning_probiotic',    block: 'morning',   name: 'UltraFlora Control（B420）',         dose: '1粒',     doseNote: '10億CFU・ディスバイオシス手当て',          badge: '空腹OK',     optional: true  },
     { id: 'morning_chlorella',    block: 'morning',   name: 'クロレラ',                          dose: '5粒',     doseNote: '抗酸化・緑栄養（B12は数えない）',          badge: 'コーヒーと', optional: true  },
     // 昼
     { id: 'lunch_enzyme',         block: 'lunch',     name: '消化酵素（Thorne）',                 dose: '2カプセル', doseNote: 'ベタインHCl・牛胆汁含む',              badge: '食べ始め', optional: false },
@@ -885,12 +886,32 @@ async function init() {
 
   // 持参リスト（travelPack）ロード or 初期化
   const tp = await idbGet('meta', 'travelPack');
+  let packFreshInit = false;
   if (tp && Array.isArray(tp.value)) {
     state.travelPack = tp.value;
   } else {
     // 未初期化：マスター全項目を「両方」前提でデフォルト持参リスト化
     state.travelPack = currentSchedule().items.filter(i => i.enabled !== false).map(i => i.id);
     await idbPut('meta', { key: 'travelPack', value: state.travelPack });
+    packFreshInit = true;
+  }
+
+  // マイグレ直後：SEEDの新項目を持参リストにも追加（"両方"前提）。
+  // pack新規初期化時は全項目入れ済みなのでスキップ。手動で除外した項目は再追加しない
+  // （seedJustMigrated=true でも、SEEDに「新たに登場した」項目だけが対象）
+  if (!seedKnown && !packFreshInit) {
+    const packSet = new Set(state.travelPack);
+    // 旧スケジュール群に含まれず・新SEEDで初登場の項目のみ追加
+    const oldIds = new Set();
+    for (const v of state.scheduleVersions) {
+      if (v.version === SEED.scheduleVersion) continue;
+      for (const it of v.items) oldIds.add(it.id);
+    }
+    const newItemIds = SEED.items.filter(i => i.enabled !== false && !oldIds.has(i.id) && !packSet.has(i.id)).map(i => i.id);
+    if (newItemIds.length > 0) {
+      state.travelPack = [...state.travelPack, ...newItemIds];
+      await idbPut('meta', { key: 'travelPack', value: state.travelPack });
+    }
   }
 
   // イベント
