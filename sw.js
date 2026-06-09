@@ -1,7 +1,7 @@
 /* サプリ摂取トラッカー Service Worker
  * アプリシェルをキャッシュしてオフライン起動を可能にする。
  * 記録データは IndexedDB（SWの管轄外）に保存される。 */
-const CACHE = 'suppl-tracker-v4';
+const CACHE = 'suppl-tracker-v5';
 const SHELL = [
   './',
   './index.html',

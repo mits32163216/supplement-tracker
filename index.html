@@ -95,7 +95,7 @@
   .block-head .bcount{margin-left:auto;font-size:11px;font-weight:700;opacity:.95;}
   .rows{padding:2px 0;}
   .row{
-    display:grid;grid-template-columns:30px 1fr auto auto;gap:12px;align-items:center;
+    display:grid;grid-template-columns:30px 1fr auto auto 26px;gap:12px;align-items:center;
     padding:8px 15px;border-top:1px solid #f0ebe0;min-height:52px;
     background:none;border-left:none;border-right:none;border-bottom:none;width:100%;text-align:left;
   }
@@ -117,6 +117,40 @@
     border:1px solid var(--line);border-radius:4px;padding:0 5px;vertical-align:1px;}
   .amt{font-weight:800;font-size:15px;color:var(--ink);text-align:right;white-space:nowrap;}
   .amt small{display:block;font-weight:500;font-size:10px;color:var(--soft);}
+
+  /* ⓘ 解説アイコン */
+  .info-btn{
+    width:24px;height:24px;border-radius:50%;
+    background:rgba(189,138,44,.10);color:var(--ochre);
+    font-family:'Shippori Mincho',serif;font-weight:800;font-style:italic;font-size:14px;
+    display:inline-flex;align-items:center;justify-content:center;
+    border:1px solid rgba(189,138,44,.35);transition:.14s ease;cursor:pointer;
+    flex:none;line-height:1;padding-bottom:1px;
+  }
+  .info-btn:active{transform:scale(.92);background:rgba(189,138,44,.22);}
+  .info-btn.has-note{background:var(--ochre);color:var(--card);border-color:var(--ochre);}
+
+  /* サプリ解説（詳細ビュー） */
+  .id-head{margin:6px 2px 12px;}
+  .id-title{font-family:'Shippori Mincho',serif;font-weight:800;font-size:22px;margin:0 0 6px;letter-spacing:.02em;}
+  .id-meta{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:13px;color:var(--soft);}
+  .id-meta .amt-inline{font-weight:800;color:var(--ink);font-size:14px;}
+  .id-meta .note-inline{color:var(--soft);}
+  .id-body{
+    background:var(--card);border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;font-size:14.5px;line-height:1.65;color:var(--ink);min-height:180px;
+  }
+  .id-body .md-h3{font-family:'Shippori Mincho',serif;font-size:15px;font-weight:700;margin:14px 0 6px;color:var(--terra);}
+  .id-body .md-h3:first-child{margin-top:0;}
+  .id-body .md-p{margin:0 0 6px;}
+  .id-body .md-ul{margin:0 0 8px;padding-left:22px;}
+  .id-body .md-ul li{margin-bottom:3px;}
+  .id-body a{color:var(--ochre);text-decoration:underline;word-break:break-all;}
+  .id-textarea{
+    width:100%;min-height:340px;border:1px solid var(--line);border-radius:9px;
+    background:var(--paper);color:var(--ink);font-family:inherit;font-size:14px;line-height:1.6;
+    padding:12px;resize:vertical;
+  }
 
   /* メモ */
   .note-card{margin-top:6px;border:1px solid var(--line);border-radius:9px;background:var(--card);padding:12px 15px;}
@@ -378,6 +412,30 @@
         <button class="btn primary full" id="saveSchedule">保存して反映（今日以降）</button>
       </div>
       <p class="muted" style="margin-top:10px">保存すると新しいバージョンになり、今日からこの内容で記録します。過去の記録は当時の内容のまま残ります。</p>
+    </section>
+
+    <!-- サプリ解説（詳細ビュー・オーバーレイ表示） -->
+    <section class="view" id="view-itemDetail">
+      <div class="cal-head">
+        <button class="navbtn" id="itemDetailBack" aria-label="戻る">‹</button>
+        <div class="mlabel">解説</div>
+        <div style="width:40px"></div>
+      </div>
+      <div class="id-head">
+        <h2 id="itemDetailTitle" class="id-title">—</h2>
+        <div id="itemDetailMeta" class="id-meta"></div>
+      </div>
+      <p class="dd-hint" id="itemDetailHint" hidden>📝 まだ解説が入っていません。「編集」を押してテンプレを開き、テキストを別Chatに渡して書いてもらい、戻ってきた内容を貼り付けて保存してください。</p>
+      <div id="itemDetailBody" class="id-body"></div>
+      <div id="itemDetailEditArea" hidden>
+        <textarea id="itemDetailTextarea" class="id-textarea" placeholder="ここに解説を書く（Markdown：## 見出し / - 箇条書き / URL自動リンク）"></textarea>
+      </div>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn primary" id="itemDetailEditBtn">編集</button>
+        <button class="btn" id="itemDetailCopyBtn" hidden>テキストをコピー</button>
+        <button class="btn ghost" id="itemDetailCancelBtn" hidden>キャンセル</button>
+        <button class="btn primary" id="itemDetailSaveBtn" hidden>保存</button>
+      </div>
     </section>
 
     <!-- 持参リスト編集（旅行モード用・オーバーレイ表示） -->

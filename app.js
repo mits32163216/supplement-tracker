@@ -44,6 +44,26 @@ const SEED = {
 };
 
 /* ============================================================
+ * 各サプリの「解説」テンプレ（別Chatに見せて埋めてもらう土台）
+ * 編集モード未入力の項目はこのテンプレが初期表示される
+ * ============================================================ */
+const ITEM_NOTE_TEMPLATE = `## なぜ私が飲むのか
+（このサプリを摂取する目的・私の体や目標との関係をここに記載）
+
+## 関連する検査値・私の実値
+（25(OH)D・ホモシステイン・甲状腺パネル など、関連する検査マーカーと私の過去の実値・基準値）
+
+## 機序（どう働くか）
+（体内での作用メカニズム・経路）
+
+## 摂取の留意点
+（飲むタイミングの根拠・他サプリとの相互作用・過剰摂取リスク・禁忌）
+
+## 参考・出典
+（参考文献・URL）
+`;
+
+/* ============================================================
  * IndexedDB ラッパ
  *   meta: {key} … 'settings' / 'scheduleVersions' / 'currentVersion'
  *   logs: {date} … DailyLog
@@ -90,7 +110,11 @@ const state = {
   calMonth: null,         // 履歴カレンダーの表示月（Date：1日）
   selectedDate: null,     // 履歴で選択中の日
   editDraft: null,        // 編集中のスケジュール（items 配列）
-  packDraft: null         // 編集中の持参リスト（itemId のSet風オブジェクト）
+  packDraft: null,        // 編集中の持参リスト（itemId のSet風オブジェクト）
+  itemNotes: {},          // {[itemId]: markdownString} 各サプリの解説本文
+  detailItemId: null,     // 詳細ビューで現在開いている itemId
+  detailReturnTo: 'today',// 詳細ビューを閉じたあとの戻り先 ('today' | 'history')
+  detailEditing: false    // 詳細ビュー：編集モードか
 };
 
 /* ===== モード/持参リスト ヘルパ ===== */
@@ -332,11 +356,13 @@ async function renderToday() {
     let rows = '';
     for (const it of items) {
       const on = !!(todayLog.entries[it.id] && todayLog.entries[it.id].checked);
+      const hasNote = !!state.itemNotes[it.id];
       rows += `<button class="row${on ? ' on' : ''}${it.optional ? ' opt' : ''}" data-id="${esc(it.id)}">
         <span class="cb">${CHECK_SVG}</span>
         <span class="name">${esc(it.name)}${it.optional ? '<span class="opt-tag">任意</span>' : ''}</span>
         <span class="amt">${esc(it.dose)}${it.doseNote ? `<small>${esc(it.doseNote)}</small>` : ''}</span>
         <span class="badge ${badgeClass(it.badge)}">${esc(it.badge || '')}</span>
+        <span class="info-btn${hasNote ? ' has-note' : ''}" data-info-id="${esc(it.id)}" aria-label="解説を見る">i</span>
       </button>`;
     }
     block.innerHTML = `<div class="block-head" style="background:${esc(b.color)}">
@@ -347,9 +373,13 @@ async function renderToday() {
     wrap.appendChild(block);
   }
 
-  // 行タップ
+  // 行タップ（ⓘアイコン押下時は詳細ビュー、それ以外は check toggle）
   $$('#todayBlocks .row').forEach(btn => {
-    btn.addEventListener('click', () => toggleToday(btn.dataset.id));
+    btn.addEventListener('click', (e) => {
+      const info = e.target.closest('.info-btn');
+      if (info) { e.preventDefault(); e.stopPropagation(); openItemDetail(info.dataset.infoId, 'today'); return; }
+      toggleToday(btn.dataset.id);
+    });
   });
 
   // メモ
@@ -481,11 +511,13 @@ async function renderDayDetail(key) {
     let rows = '';
     for (const it of items) {
       const on = !!(log.entries[it.id] && log.entries[it.id].checked);
-      rows += `<button class="row${on ? ' on' : ''}${it.optional ? ' opt' : ''}" data-id="${esc(it.id)}" ${editable ? '' : 'disabled'}>
+      const hasNote = !!state.itemNotes[it.id];
+      rows += `<button class="row${on ? ' on' : ''}${it.optional ? ' opt' : ''}" data-id="${esc(it.id)}">
         <span class="cb">${CHECK_SVG}</span>
         <span class="name">${esc(it.name)}${it.optional ? '<span class="opt-tag">任意</span>' : ''}</span>
         <span class="amt">${esc(it.dose)}${it.doseNote ? `<small>${esc(it.doseNote)}</small>` : ''}</span>
         <span class="badge ${badgeClass(it.badge)}">${esc(it.badge || '')}</span>
+        <span class="info-btn${hasNote ? ' has-note' : ''}" data-info-id="${esc(it.id)}" aria-label="解説を見る">i</span>
       </button>`;
     }
     html += `<div class="block" style="margin-bottom:10px">
@@ -493,12 +525,21 @@ async function renderDayDetail(key) {
       <span class="ctx">${esc(b.context || '')}</span></div><div class="rows">${rows}</div></div>`;
   }
   html += `<div class="note-card"><label>この日のメモ</label>
-    <textarea id="dayNote" ${editable ? '' : 'disabled'} placeholder="${editable ? '任意。自動保存されます。' : ''}">${esc(log.note || '')}</textarea></div>`;
+    <textarea id="dayNote" placeholder="${editable ? '任意。自動保存されます。' : ''}">${esc(log.note || '')}</textarea></div>`;
 
   detail.innerHTML = html;
 
+  // ⓘ アイコンは編集不可日でも有効（解説は読める）
+  $$('#dayDetail .row .info-btn').forEach(info => {
+    info.addEventListener('click', (e) => {
+      e.preventDefault(); e.stopPropagation();
+      openItemDetail(info.dataset.infoId, 'history');
+    });
+  });
   if (editable) {
-    $$('#dayDetail .row').forEach(btn => btn.addEventListener('click', async () => {
+    $$('#dayDetail .row').forEach(btn => btn.addEventListener('click', async (e) => {
+      // ⓘ タップは詳細ビュー（上のハンドラで先に処理）— check toggle はそれ以外
+      if (e.target.closest('.info-btn')) return;
       const id = btn.dataset.id;
       const cur = log.entries[id] && log.entries[id].checked;
       log.entries[id] = { checked: !cur, checkedAt: !cur ? new Date().toISOString() : null };
@@ -558,6 +599,148 @@ async function renderSettings() {
       </div>`;
     }).join('');
   }
+}
+
+/* ============================================================
+ * サプリ解説（item-detail）
+ *   タップでⓘアイコン → 詳細ビュー（5セクションのテンプレ入り）
+ *   別Chatに渡すための土台。編集モードでMarkdown手入力→保存
+ * ============================================================ */
+
+/** itemIdから schedule items を全バージョンから探して返す（過去日からの遷移にも対応） */
+function findItemAcross(itemId) {
+  for (let i = state.scheduleVersions.length - 1; i >= 0; i--) {
+    const it = state.scheduleVersions[i].items.find(x => x.id === itemId);
+    if (it) return it;
+  }
+  return null;
+}
+
+/** 詳細ビューを開く */
+function openItemDetail(itemId, returnTo) {
+  state.detailItemId = itemId;
+  state.detailReturnTo = returnTo || 'today';
+  state.detailEditing = false;
+  showView('item-detail');
+  renderItemDetail();
+}
+
+/** 表示モードでのレンダリング */
+function renderItemDetail() {
+  const it = findItemAcross(state.detailItemId);
+  if (!it) { showView('today'); return; }
+  const md = state.itemNotes[it.id] || ITEM_NOTE_TEMPLATE;
+  $('#itemDetailTitle').textContent = it.name;
+  // 用量・タイミング・任意/必須を上部の小カードに出す
+  const metaParts = [];
+  metaParts.push(`<span class="amt-inline">${esc(it.dose || '')}</span>`);
+  if (it.doseNote) metaParts.push(`<span class="note-inline">${esc(it.doseNote)}</span>`);
+  if (it.badge) metaParts.push(`<span class="badge ${badgeClass(it.badge)}">${esc(it.badge)}</span>`);
+  if (it.optional) metaParts.push('<span class="opt-tag">任意</span>');
+  $('#itemDetailMeta').innerHTML = metaParts.join(' ');
+
+  // 表示と編集の出し分け
+  const isDefault = !state.itemNotes[it.id];
+  if (state.detailEditing) {
+    $('#itemDetailBody').hidden = true;
+    $('#itemDetailEditArea').hidden = false;
+    $('#itemDetailTextarea').value = md;
+    $('#itemDetailHint').hidden = false;
+    $('#itemDetailEditBtn').hidden = true;
+    $('#itemDetailSaveBtn').hidden = false;
+    $('#itemDetailCancelBtn').hidden = false;
+    $('#itemDetailCopyBtn').hidden = false;
+  } else {
+    $('#itemDetailBody').hidden = false;
+    $('#itemDetailEditArea').hidden = true;
+    $('#itemDetailHint').hidden = !isDefault;  // テンプレ未編集なら案内表示
+    $('#itemDetailEditBtn').hidden = false;
+    $('#itemDetailSaveBtn').hidden = true;
+    $('#itemDetailCancelBtn').hidden = true;
+    $('#itemDetailCopyBtn').hidden = true;
+    $('#itemDetailBody').innerHTML = renderMarkdown(md);
+  }
+}
+
+/** 編集モードに切替 */
+function startEditItemDetail() {
+  state.detailEditing = true;
+  renderItemDetail();
+  setTimeout(() => { const ta = $('#itemDetailTextarea'); if (ta) { ta.focus(); ta.setSelectionRange(0, 0); } }, 50);
+}
+
+/** 保存 */
+async function saveItemDetail() {
+  const md = $('#itemDetailTextarea').value;
+  if (md.trim() === '' || md.trim() === ITEM_NOTE_TEMPLATE.trim()) {
+    // 空 or テンプレのまま → 削除扱い（テンプレに戻す）
+    delete state.itemNotes[state.detailItemId];
+  } else {
+    state.itemNotes[state.detailItemId] = md;
+  }
+  await idbPut('meta', { key: 'itemNotes', value: state.itemNotes });
+  state.detailEditing = false;
+  toast('解説を保存しました');
+  renderItemDetail();
+}
+
+/** キャンセル */
+function cancelEditItemDetail() {
+  state.detailEditing = false;
+  renderItemDetail();
+}
+
+/** 戻る */
+function backFromItemDetail() {
+  showView(state.detailReturnTo === 'history' ? 'history' : 'today');
+}
+
+/** クリップボードへコピー（別Chatに渡すため） */
+async function copyItemDetailToClipboard() {
+  const ta = $('#itemDetailTextarea');
+  const text = ta.value;
+  try {
+    await navigator.clipboard.writeText(text);
+    toast('コピーしました（別Chatに貼り付け）');
+  } catch (e) {
+    // フォールバック：select+execCommand
+    ta.focus(); ta.select();
+    try { document.execCommand('copy'); toast('コピーしました'); } catch { toast('コピーできませんでした'); }
+  }
+}
+
+/** 軽量Markdown描画：## 見出し / - 箇条書き / 空行で段落区切り / URL自動リンク */
+function renderMarkdown(md) {
+  if (!md) return '';
+  const lines = md.split('\n');
+  let html = '';
+  let inList = false;
+  const closeList = () => { if (inList) { html += '</ul>'; inList = false; } };
+  const linkify = (txt) => {
+    const esced = esc(txt);
+    return esced.replace(/(https?:\/\/[^\s<>"]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+  };
+  for (const raw of lines) {
+    const line = raw.replace(/\r$/, '');
+    const h3 = line.match(/^##\s+(.+)$/);
+    const li = line.match(/^-\s+(.+)$/);
+    if (h3) {
+      closeList();
+      html += `<h3 class="md-h3">${esc(h3[1])}</h3>`;
+    } else if (li) {
+      if (!inList) { html += '<ul class="md-ul">'; inList = true; }
+      html += `<li>${linkify(li[1])}</li>`;
+    } else if (line.trim() === '') {
+      closeList();
+      // 段落区切り（連続する空行は1つに）
+      if (!html.endsWith('</p>') && !html.endsWith('</h3>') && !html.endsWith('</ul>') && html !== '') html += '<br>';
+    } else {
+      closeList();
+      html += `<p class="md-p">${linkify(line)}</p>`;
+    }
+  }
+  closeList();
+  return html;
 }
 
 /* ============================================================
@@ -837,12 +1020,14 @@ async function importJson(file) {
  * ============================================================ */
 function showView(name) {
   $$('.view').forEach(v => v.classList.remove('active'));
-  const map = { today: 'view-today', history: 'view-history', settings: 'view-settings', editor: 'view-editor', pack: 'view-pack' };
+  const map = { today: 'view-today', history: 'view-history', settings: 'view-settings', editor: 'view-editor', pack: 'view-pack', 'item-detail': 'view-itemDetail' };
   $('#' + map[name]).classList.add('active');
-  // ボトムナビは「pack」「editor」は今日タブをアクティブ風に維持
-  const navTab = (name === 'pack' || name === 'editor') ? 'today' : name;
+  // ボトムナビは「pack」「editor」「item-detail」は元の戻り先タブをアクティブ風に維持
+  let navTab = name;
+  if (name === 'pack' || name === 'editor') navTab = 'today';
+  else if (name === 'item-detail') navTab = state.detailReturnTo === 'history' ? 'history' : 'today';
   $$('nav.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === navTab));
-  $('#todayTitle').textContent = { today: '今日', history: '履歴', settings: '設定', editor: '設定', pack: '持参リスト' }[name];
+  $('#todayTitle').textContent = { today: '今日', history: '履歴', settings: '設定', editor: '設定', pack: '持参リスト', 'item-detail': '解説' }[name];
 
   if (name === 'today') renderToday();
   else if (name === 'history') renderHistory();
@@ -883,6 +1068,10 @@ async function init() {
     await idbPut('meta', { key: 'scheduleVersions', value: state.scheduleVersions });
     await idbPut('meta', { key: 'currentVersion', value: state.currentVersion });
   }
+
+  // 各サプリの解説（itemNotes）ロード
+  const inotes = await idbGet('meta', 'itemNotes');
+  state.itemNotes = (inotes && inotes.value && typeof inotes.value === 'object') ? inotes.value : {};
 
   // 持参リスト（travelPack）ロード or 初期化
   const tp = await idbGet('meta', 'travelPack');
@@ -937,6 +1126,13 @@ async function init() {
   // 持参リスト編集の保存・戻る
   const savePackBtn = $('#savePackBtn'); if (savePackBtn) savePackBtn.addEventListener('click', savePackList);
   const packBackBtn = $('#packBack'); if (packBackBtn) packBackBtn.addEventListener('click', cancelPackList);
+
+  // サプリ解説（item-detail）
+  const idBack = $('#itemDetailBack'); if (idBack) idBack.addEventListener('click', backFromItemDetail);
+  const idEdit = $('#itemDetailEditBtn'); if (idEdit) idEdit.addEventListener('click', startEditItemDetail);
+  const idSave = $('#itemDetailSaveBtn'); if (idSave) idSave.addEventListener('click', saveItemDetail);
+  const idCancel = $('#itemDetailCancelBtn'); if (idCancel) idCancel.addEventListener('click', cancelEditItemDetail);
+  const idCopy = $('#itemDetailCopyBtn'); if (idCopy) idCopy.addEventListener('click', copyItemDetailToClipboard);
 
   // 復帰時に日付が変わっていたら今日を更新
   document.addEventListener('visibilitychange', () => {
