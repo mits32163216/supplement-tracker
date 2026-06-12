@@ -7,23 +7,24 @@
  * シードデータ（§3.2）
  * ============================================================ */
 const SEED = {
-  scheduleVersion: '2026-06-09',
+  scheduleVersion: '2026-06-12',
   blocks: [
-    { id: 'morning',   label: '朝',     context: '断食。コーヒー＋MCTと',     color: '#bd8a2c' },
-    { id: 'lunch',     label: '昼',     context: 'ランチ＝メイン食',          color: '#4f6f52' },
-    { id: 'afternoon', label: '午後',   context: 'コーヒー2杯目（〜14時台）',  color: '#8a5a3c' },
-    { id: 'evening',   label: '夕方',   context: '補食',                      color: '#b5562f' },
-    { id: 'night',     label: '夜',     context: '食べない or 0.5食',        color: '#3f4f7a' },
-    { id: 'bedtime',   label: '寝る前', context: '',                         color: '#6e3f5f' }
+    { id: 'morning',   label: '朝',         context: '断食。コーヒー＋MCTと',     color: '#bd8a2c' },
+    { id: 'lunch',     label: '昼',         context: 'ランチ＝メイン食',          color: '#4f6f52' },
+    { id: 'afternoon', label: '午後',       context: 'コーヒー2杯目（〜14時台）',  color: '#8a5a3c' },
+    { id: 'evening',   label: '夕方',       context: '補食',                      color: '#b5562f' },
+    { id: 'night',     label: '夜',         context: '食べない or 0.5食',        color: '#3f4f7a' },
+    { id: 'bedtime',   label: '寝る前',     context: '',                         color: '#6e3f5f' },
+    { id: 'running',   label: 'ランニング後', context: '走った日だけ',              color: '#2e7d6b' }
   ],
   items: [
     // 朝
-    { id: 'morning_citrate',      block: 'morning',   name: 'クエン酸',                          dose: '3粒',     doseNote: '470mg/粒・水と一緒に',                  badge: 'コーヒー前', optional: false },
+    { id: 'morning_citrate',      block: 'morning',   name: 'クエン酸',                          dose: '3粒',     doseNote: '470mg/粒・水と一緒に',                  badge: 'コーヒーと', optional: false },
     { id: 'morning_mct',          block: 'morning',   name: 'MCTオイル',                         dose: '小さじ1', doseNote: 'C8/C10・ケトン供給',                    badge: 'コーヒーに', optional: false },
     { id: 'morning_b_complex',    block: 'morning',   name: 'Basic B Complex（活性型）',          dose: '2粒',     doseNote: 'メチル葉酸・メチルB12・B2計20mg',        badge: 'コーヒーと', optional: false },
     { id: 'morning_b12',          block: 'morning',   name: 'メチルコバラミンB12',                dose: '1粒',     doseNote: '500mcg',                                badge: 'コーヒーと', optional: false },
     { id: 'morning_probiotic',    block: 'morning',   name: 'UltraFlora Control（B420）',         dose: '1粒',     doseNote: '10億CFU・ディスバイオシス手当て',          badge: '空腹OK',     optional: true  },
-    { id: 'morning_chlorella',    block: 'morning',   name: 'クロレラ',                          dose: '5粒',     doseNote: '抗酸化・緑栄養（B12は数えない）',          badge: 'コーヒーと', optional: true  },
+    { id: 'morning_chlorella',    block: 'morning',   name: 'クロレラ',                          dose: '5粒',     doseNote: 'カビ毒の予防的吸着（B12は数えない）',      badge: 'コーヒーと', optional: true  },
     // 昼
     { id: 'lunch_enzyme',         block: 'lunch',     name: '消化酵素（Thorne）',                 dose: '2カプセル', doseNote: 'ベタインHCl・牛胆汁含む',              badge: '食べ始め', optional: false },
     { id: 'lunch_solaray',        block: 'lunch',     name: 'Solaray Calcium Citrate Plus',     dose: '2粒',     doseNote: 'Ca/Mg/Zn/銅/D/B6複合',                  badge: '食事と',   optional: false },
@@ -32,7 +33,7 @@ const SEED = {
     { id: 'lunch_stage7',         block: 'lunch',     name: 'STAGE7（アムラ・ウコン等）',         dose: '2粒',     doseNote: '抗酸化・ウコンは脂と吸収UP',             badge: '食事と',   optional: true  },
     { id: 'lunch_juice',          block: 'lunch',     name: '人参ジュース',                       dose: '1杯',     badge: '食後',                                                                              optional: true  },
     // 午後
-    { id: 'afternoon_citrate',    block: 'afternoon', name: 'クエン酸',                          dose: '2粒',     doseNote: '470mg/粒・水と一緒に',                  badge: 'コーヒー前', optional: false },
+    { id: 'afternoon_citrate',    block: 'afternoon', name: 'クエン酸',                          dose: '2粒',     doseNote: '470mg/粒・水と一緒に',                  badge: 'コーヒーと', optional: false },
     // 夕方
     { id: 'evening_solaray',      block: 'evening',   name: 'Solaray Calcium Citrate Plus',     dose: '1粒',     doseNote: '複合',                                  badge: '食事と',   optional: false },
     { id: 'evening_enzyme',       block: 'evening',   name: '消化酵素（Thorne）',                 dose: '2カプセル', doseNote: '固形のとき',                          badge: '食事と',   optional: true  },
@@ -40,7 +41,11 @@ const SEED = {
     { id: 'night_enzyme',         block: 'night',     name: '消化酵素（Thorne）',                 dose: '2カプセル', doseNote: '食べる日だけ',                        badge: '食事と',   optional: true  },
     // 寝る前
     { id: 'bedtime_magnesium',    block: 'bedtime',   name: 'マグネシウム（Thorne CitraMate）',   dose: '1粒',     doseNote: '元素Mg 135mg・クエン酸+リンゴ酸',        badge: '空腹OK',   optional: false },
-    { id: 'topical_magrelief',    block: 'bedtime',   name: 'Mag Relief ローション（外用）',       dose: '2〜4プッシュ', doseNote: '入浴後/ストレッチ後・ふくらはぎ/足裏/肩/首', badge: '外用',     optional: true  }
+    { id: 'topical_magrelief',    block: 'bedtime',   name: 'Mag Relief ローション（外用）',       dose: '2〜4プッシュ', doseNote: '入浴後/ストレッチ後・ふくらはぎ/足裏/肩/首', badge: '外用',     optional: true  },
+    // ランニング後（runOnly:true — isRunDay=true の日だけ表示・分母にも入る）
+    { id: 'run_magnesium',        block: 'running',   name: 'マグネシウム（Thorne CitraMate）追加分', dose: '1粒',       doseNote: '寝る前1粒と合わせ計2粒体制・発汗でのMg喪失/筋回復', badge: '空腹OK', optional: false, runOnly: true },
+    { id: 'run_electrolyte',      block: 'running',   name: '電解質（沖縄天然塩）',                  dose: '水500mlに塩ひとつまみ', doseNote: '発汗での電解質喪失の補給',         badge: '空腹OK', optional: false, runOnly: true },
+    { id: 'run_magrelief',        block: 'running',   name: 'Mag Relief ローション（外用・ラン後）', dose: '2〜4プッシュ', doseNote: '経皮Mg・局所の筋回復（ふくらはぎ/足裏）',     badge: '外用',     optional: true,  runOnly: true }
   ]
 };
 
@@ -342,24 +347,32 @@ const state = {
   detailEditing: false    // 詳細ビュー：編集モードか
 };
 
-/* ===== モード/持参リスト ヘルパ ===== */
+/* ===== モード/持参リスト/ランニング ヘルパ ===== */
 function currentMode() { return state.settings.mode || 'home'; }
-/** その日の "見える項目" を mode/pack で絞る共通フィルタ */
-function filterByModeAndPack(items, mode, packList) {
-  const arr = items.filter(i => i.enabled !== false);
+function currentIsRunDayToday() { return !!(typeof todayLog !== 'undefined' && todayLog && todayLog.isRunDay === true); }
+
+/** その日の "見える項目" を mode/pack/isRunDay で絞る共通フィルタ
+ * - runOnly:true 項目は isRunDay=true の日だけ残す（分母にも入る）
+ * - 走らない日は runOnly 項目が見えない＝連続記録が崩れない（旅行モードと同じ思想）
+ */
+function filterByModeAndPack(items, mode, packList, isRunDay) {
+  let arr = items.filter(i => i.enabled !== false);
+  // ラン日でなければ runOnly 項目を除外
+  if (!isRunDay) arr = arr.filter(i => i.runOnly !== true);
+  // 旅行モードは持参リストで絞る（runOnly項目もpackに入っていれば残る）
   if (mode !== 'travel') return arr;
   const pack = new Set(packList || []);
   return arr.filter(i => pack.has(i.id));
 }
-/** 今日の visible items（現在のmode/pack基準） */
+/** 今日の visible items（現在のmode/pack/isRunDay基準） */
 function visibleItemsToday(sched) {
-  return filterByModeAndPack(sched.items, currentMode(), state.travelPack);
+  return filterByModeAndPack(sched.items, currentMode(), state.travelPack, currentIsRunDayToday());
 }
-/** 過去日の visible items（その日のlogのmode/pack基準） */
+/** 過去日の visible items（その日のlogのmode/pack/isRunDay基準） */
 function visibleItemsForLog(log, sched) {
   const mode = log.mode || 'home';
   const pack = mode === 'travel' ? (log.packList || state.travelPack || []) : null;
-  return filterByModeAndPack(sched.items, mode, pack);
+  return filterByModeAndPack(sched.items, mode, pack, log.isRunDay === true);
 }
 
 function currentSchedule() {
@@ -396,7 +409,7 @@ async function getLog(date) {
 async function ensureLog(date) {
   let log = await getLog(date);
   if (!log) {
-    log = { date, entries: {}, note: '', scheduleVersion: state.currentVersion };
+    log = { date, entries: {}, note: '', scheduleVersion: state.currentVersion, isRunDay: false };
     // 今日のログは生成時に現在のmode/packListをスタンプ
     if (date === todayKey()) {
       log.mode = currentMode();
@@ -415,9 +428,11 @@ async function saveLog(log) {
     if (log.mode === 'travel') log.packList = [...(state.travelPack || [])];
     else delete log.packList;
   }
-  // 空ログ（チェック0・メモ無し）は保存しない＝記録が無い日はそのまま「未」
+  // 空ログ（チェック0・メモ無し・ラン日でない）は保存しない＝記録が無い日はそのまま「未」
   const hasCheck = Object.values(log.entries || {}).some(e => e && e.checked);
-  if (!hasCheck && !(log.note && log.note.trim())) {
+  const hasNote = !!(log.note && log.note.trim());
+  const hasRunDay = log.isRunDay === true;
+  if (!hasCheck && !hasNote && !hasRunDay) {
     await idbDelete('logs', log.date);
     return;
   }
@@ -428,9 +443,12 @@ async function saveLog(log) {
  * 集計
  * ============================================================ */
 function requiredItemsFor(sched) { return sched.items.filter(i => i.enabled !== false && !i.optional); }
-/** その日のmode/packListで「必須として期待されている項目」を絞り込んで返す */
+/** その日のmode/packList/isRunDayで「必須として期待されている項目」を絞り込んで返す */
 function requiredItemsForDay(log, sched) {
   let required = requiredItemsFor(sched);
+  const isRun = log.isRunDay === true;
+  // 走らない日は runOnly 必須項目を分母から外す（連続記録を守る）
+  if (!isRun) required = required.filter(i => i.runOnly !== true);
   const mode = log.mode || 'home';
   if (mode === 'travel') {
     const pack = new Set(log.packList || []);
@@ -505,7 +523,10 @@ async function computeAdherence() {
         // 旅行モードの日は持参リストに無い項目を「期待されていない」とみなして分母から除外
         const dayMode = log && log.mode ? log.mode : 'home';
         const inPack = dayMode === 'travel' && log.packList ? log.packList.includes(it.id) : true;
-        if (dayMode !== 'travel' || inPack) {
+        // runOnly項目は ラン日でない日は「期待されていない」とみなして分母から除外
+        const isRunDayThatDay = !!(log && log.isRunDay === true);
+        const runOK = !it.runOnly || isRunDayThatDay;
+        if ((dayMode !== 'travel' || inPack) && runOK) {
           denom++;
           if (log && log.entries[it.id] && log.entries[it.id].checked) num++;
         }
@@ -972,12 +993,24 @@ function renderMarkdown(md) {
  * モード切替（在宅 ⇄ 旅行）と 持参リスト編集
  * ============================================================ */
 
-/** 現在のmodeをUIに反映（モードバー・🧳バッジ・持参リスト編集ボタンの表示） */
+/** 現在のmode/isRunDayをUIに反映（モードバー・🧳バッジ・持参リスト編集ボタン・🏃ラントグル） */
 function updateModeUI() {
   const mode = currentMode();
   $$('#modeBar .mode-btn').forEach(b => b.classList.toggle('on', b.dataset.mode === mode));
   const ind = $('#travelIndicator'); if (ind) ind.hidden = (mode !== 'travel');
   const pbtn = $('#packEditBtnInline'); if (pbtn) pbtn.hidden = (mode !== 'travel');
+  const runBtn = $('#runToggle'); if (runBtn) runBtn.classList.toggle('on', currentIsRunDayToday());
+  const runInd = $('#runIndicator'); if (runInd) runInd.hidden = !currentIsRunDayToday();
+}
+
+/** 🏃 今日走った トグル */
+async function toggleRunDay() {
+  // 日付が変わっていたら作り直す（深夜にまたいだ場合の保険）
+  if (todayKey() !== state.todayKey) { await renderToday(); return; }
+  todayLog.isRunDay = !todayLog.isRunDay;
+  await saveLog(todayLog);
+  await renderToday();
+  toast(todayLog.isRunDay ? '🏃 ラン日に切替えました' : 'ラン日OFF');
 }
 
 /** モード切替（在宅 ⇄ 旅行） */
@@ -1360,6 +1393,8 @@ async function init() {
 
   // モード切替（在宅 ⇄ 旅行）
   $$('#modeBar .mode-btn').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+  // 🏃 今日走った トグル
+  const rBtn = $('#runToggle'); if (rBtn) rBtn.addEventListener('click', toggleRunDay);
   // 持参リスト編集ボタン（モードバー横・設定タブ両方）
   const pBtnInline = $('#packEditBtnInline'); if (pBtnInline) pBtnInline.addEventListener('click', () => openPackEditor(false));
   const pBtnSettings = $('#openPackEditor'); if (pBtnSettings) pBtnSettings.addEventListener('click', () => openPackEditor(false));

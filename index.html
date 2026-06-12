@@ -56,6 +56,8 @@
     font-weight:700;font-size:12px;padding:2px 9px;border-radius:999px;}
   .travel-pill{display:inline-flex;align-items:center;gap:4px;background:rgba(63,79,122,.14);color:var(--yoru);
     font-weight:700;font-size:12px;padding:2px 9px;border-radius:999px;}
+  .run-pill{display:inline-flex;align-items:center;gap:4px;background:rgba(46,125,107,.16);color:#2e7d6b;
+    font-weight:700;font-size:12px;padding:2px 9px;border-radius:999px;}
   .day-mode-pill{display:inline-flex;align-items:center;gap:4px;background:rgba(63,79,122,.14);color:var(--yoru);
     font-weight:700;font-size:11px;padding:2px 8px;border-radius:999px;margin-left:6px;vertical-align:2px;}
 
@@ -71,6 +73,17 @@
   .mode-btn.on{background:var(--ink);color:var(--card);border-color:var(--ink);}
   .mode-btn[data-mode="travel"].on{background:var(--yoru);border-color:var(--yoru);}
   .mode-bar-edit{flex:none;font-size:12px;padding:7px 10px;}
+
+  /* ===== 🏃 今日走った トグル（独立軸） ===== */
+  .run-bar{display:flex;margin:0 2px 12px;}
+  .run-toggle{
+    flex:1;border:1px solid var(--line);background:var(--card);
+    padding:9px 8px;border-radius:9px;font-weight:700;font-size:13px;color:var(--soft);
+    display:inline-flex;align-items:center;justify-content:center;gap:6px;
+    transition:.16s ease;
+  }
+  .run-toggle:active{transform:scale(.98);}
+  .run-toggle.on{background:#2e7d6b;color:var(--card);border-color:#2e7d6b;}
 
   /* ===== コンテンツ ===== */
   main{flex:1;padding:16px 16px 96px;}
@@ -289,6 +302,7 @@
           <span><b id="todayDate">—</b></span>
           <span class="streak-pill" id="streakPill" hidden>🔥 <span id="streakN">0</span>日連続</span>
           <span class="travel-pill" id="travelIndicator" hidden>🧳 旅行中</span>
+          <span class="run-pill" id="runIndicator" hidden>🏃 ラン日</span>
         </div>
       </div>
     </div>
@@ -301,6 +315,9 @@
         <button class="mode-btn on" data-mode="home" aria-label="在宅モード">🏠 在宅</button>
         <button class="mode-btn" data-mode="travel" aria-label="旅行モード">🧳 旅行</button>
         <button class="btn ghost mode-bar-edit" id="packEditBtnInline" hidden>持参リスト編集</button>
+      </div>
+      <div id="runBar" class="run-bar">
+        <button class="run-toggle" id="runToggle" aria-label="今日走ったトグル">🏃 今日走った</button>
       </div>
       <div class="legend">
         <span class="lab">印：</span>
