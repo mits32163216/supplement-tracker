@@ -275,6 +275,15 @@
   nav.tabs button.on{color:var(--ink);}
   nav.tabs button.on .ic svg{stroke:var(--terra);}
 
+  /* 更新バナー（SW更新検知時に表示・タップで再読込） */
+  .update-banner{
+    position:fixed;left:50%;top:calc(var(--safe-top) + 10px);transform:translateX(-50%);
+    background:var(--yoru);color:var(--card);font-family:inherit;font-size:13px;font-weight:700;
+    padding:10px 18px;border-radius:999px;border:none;cursor:pointer;z-index:60;
+    box-shadow:0 10px 24px -10px rgba(0,0,0,.5);
+  }
+  .update-banner:active{transform:translateX(-50%) scale(.97);}
+
   /* トースト */
   .toast{position:fixed;left:50%;bottom:calc(var(--safe-bottom) + 78px);transform:translateX(-50%) translateY(20px);
     background:var(--ink);color:var(--card);font-size:13px;font-weight:600;padding:10px 16px;border-radius:999px;
@@ -490,6 +499,7 @@
 </div>
 
 <div class="toast" id="toast"></div>
+<button class="update-banner" id="updateBanner" hidden>🔄 新しいバージョンがあります — タップで更新</button>
 
 <script src="app.js"></script>
 </body>

@@ -824,7 +824,11 @@ async function renderSettings() {
   sel.value = String(state.settings.dayBoundaryHour);
   $('#adhWindow').textContent = state.settings.adhWindow;
   $('#schedVer').textContent = state.currentVersion;
-  $('#appInfo').textContent = `サプリ摂取トラッカー v1.0 ／ 全データ端末内（IndexedDB）／ 記録した日数：${(await idbAll('logs')).length}日`;
+  let persistLabel = '';
+  if (navigator.storage && navigator.storage.persisted) {
+    try { persistLabel = (await navigator.storage.persisted()) ? '／ 永続化:✓' : '／ 永続化:未'; } catch (e) {}
+  }
+  $('#appInfo').textContent = `サプリ摂取トラッカー v1.0 ／ 全データ端末内（IndexedDB）${persistLabel} ／ 記録した日数：${(await idbAll('logs')).length}日`;
 
   const s = await computeStats();
   $('#statStreak').textContent = s.current;
@@ -1233,20 +1237,34 @@ async function exportJson() {
   const logs = await idbAll('logs');
   const data = {
     app: 'supplement-tracker', exportedAt: new Date().toISOString(),
-    settings: state.settings, scheduleVersions: state.scheduleVersions, currentVersion: state.currentVersion, logs
+    settings: state.settings, scheduleVersions: state.scheduleVersions, currentVersion: state.currentVersion, logs,
+    // 解説（手動編集含む）と持参リストもバックアップに含める（v8まで漏れていた）
+    itemNotes: state.itemNotes,
+    travelPack: state.travelPack
   };
   download(`supplement-tracker_${todayKey()}.json`, JSON.stringify(data, null, 2), 'application/json');
   toast('JSONを書き出しました');
 }
 async function exportCsv() {
   const logs = (await idbAll('logs')).sort((a, b) => a.date < b.date ? -1 : 1);
-  const rows = [['date', 'itemId', 'name', 'checked', 'timestamp']];
+  // expected＝その日その項目が「対象」だったか（旅行の持参外・走らない日のラン項目は0）。
+  // 「サボった(checked=0,expected=1)」と「対象外(expected=0)」を分析で区別するための列。
+  const rows = [['date', 'itemId', 'name', 'checked', 'timestamp', 'optional', 'mode', 'isRunDay', 'expected']];
   for (const log of logs) {
     const sched = scheduleByVersion(log.scheduleVersion);
+    const dayMode = log.mode || 'home';
+    const isRun = log.isRunDay === true;
     for (const it of sched.items) {
       if (it.enabled === false) continue;
       const e = log.entries[it.id];
-      rows.push([log.date, it.id, it.name, e && e.checked ? '1' : '0', (e && e.checkedAt) || '']);
+      const inPack = dayMode === 'travel' ? (log.packList || []).includes(it.id) : true;
+      const runOK = !it.runOnly || isRun;
+      const expected = inPack && runOK;
+      rows.push([
+        log.date, it.id, it.name,
+        e && e.checked ? '1' : '0', (e && e.checkedAt) || '',
+        it.optional ? '1' : '0', dayMode, isRun ? '1' : '0', expected ? '1' : '0'
+      ]);
     }
   }
   const csv = rows.map(r => r.map(c => {
@@ -1264,6 +1282,8 @@ async function importJson(file) {
     if (data.settings) { state.settings = Object.assign(state.settings, data.settings); await idbPut('meta', { key: 'settings', value: state.settings }); }
     if (data.scheduleVersions) { state.scheduleVersions = data.scheduleVersions; await idbPut('meta', { key: 'scheduleVersions', value: state.scheduleVersions }); }
     if (data.currentVersion) { state.currentVersion = data.currentVersion; await idbPut('meta', { key: 'currentVersion', value: state.currentVersion }); }
+    if (data.itemNotes && typeof data.itemNotes === 'object') { state.itemNotes = data.itemNotes; await idbPut('meta', { key: 'itemNotes', value: state.itemNotes }); }
+    if (Array.isArray(data.travelPack)) { state.travelPack = data.travelPack; await idbPut('meta', { key: 'travelPack', value: state.travelPack }); }
     // ログ全消し→投入
     const existing = await idbAll('logs');
     for (const l of existing) await idbDelete('logs', l.date);
@@ -1416,9 +1436,28 @@ async function init() {
 
   await renderToday();
 
-  // Service Worker
+  // ストレージ永続化宣言：容量逼迫時にOSがIndexedDBを削除候補にするのを防ぐ
+  if (navigator.storage && navigator.storage.persist) {
+    navigator.storage.persist().catch(() => {});
+  }
+
+  // Service Worker（更新検知付き：新版が裏で入ったらバナーで知らせる）
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      reg.addEventListener('updatefound', () => {
+        const nw = reg.installing;
+        if (!nw) return;
+        nw.addEventListener('statechange', () => {
+          // controller がいる＝既存ページの更新（初回インストールでは出さない）
+          if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+            const banner = $('#updateBanner');
+            if (banner) banner.hidden = false;
+          }
+        });
+      });
+    }).catch(() => {});
+    const banner = $('#updateBanner');
+    if (banner) banner.addEventListener('click', () => location.reload());
   }
 }
 
